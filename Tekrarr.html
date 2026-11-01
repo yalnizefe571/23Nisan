@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>4. Sınıf Din Kültürü Eğlenceli Testi</title>
+    <!-- Konfeti Efekti İçin Kütüphane -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #a8edf0 0%, #fed6e3 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 15px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            width: 100%;
+            max-width: 650px;
+            padding: 25px;
+            position: relative;
+            overflow: hidden;
+            border: 4px solid #4A90E2;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .header h1 {
+            color: #2C3E50;
+            font-size: 22px;
+            margin-bottom: 10px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            background-color: #e0e0e0;
+            height: 15px;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 15px;
+        }
+
+        .progress {
+            height: 100%;
+            background: linear-gradient(90deg, #FF9A9E 0%, #FECFEF 99%, #FECFEF 100%);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .question-info {
+            display: flex;
+            justify-content: space-between;
+            font-weight: bold;
+            color: #7F8C8D;
+            margin-bottom: 15px;
+            font-size: 14px;
+        }
+
+        .question-box {
+            background-color: #F8F9FA;
+            border-left: 5px solid #FF6B6B;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 17px;
+            color: #2C3E50;
+            font-weight: 600;
+            line-height: 1.5;
+        }
+
+        .options-container {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .btn-option {
+            background-color: #ffffff;
+            border: 2px solid #E2E8F0;
+            padding: 14px 18px;
+            border-radius: 12px;
+            text-align: left;
+            font-size: 15px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            color: #333;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .btn-option:hover {
+            background-color: #EDF2F7;
+            transform: translateY(-2px);
+        }
+
+        .btn-option.correct {
+            background-color: #2ECC71 !important;
+            color: white !important;
+            border-color: #27AE60 !important;
+        }
+
+        .btn-option.wrong {
+            background-color: #E74C3C !important;
+            color: white !important;
+            border-color: #C0392B !important;
+        }
+
+        .footer {
+            margin-top: 25px;
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .btn-next {
+            background-color: #4A90E2;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            display: none;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .btn-next:hover {
+            background-color: #357ABD;
+        }
+
+        /* Sonuç Ekranı */
+        .result-screen {
+            text-align: center;
+            display: none;
+        }
+
+        .result-screen h2 {
+            font-size: 28px;
+            color: #2C3E50;
+            margin-bottom: 15px;
+        }
+
+        .score-badge {
+            font-size: 48px;
+            font-weight: bold;
+            color: #E67E22;
+            margin: 20px 0;
+        }
+
+        .btn-restart {
+            background-color: #2ECC71;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 30px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div id="quiz-box">
+        <div class="header">
+            <h1>✨ 4. Sınıf Din Kültürü Testi ✨</h1>
+            <div class="progress-bar">
+                <div class="progress" id="progress"></div>
+            </div>
+            <div class="question-info">
+                <span id="question-number">Soru 1/20</span>
+                <span id="score-info">Puan: 0</span>
+            </div>
+        </div>
+
+        <div class="question-box" id="question-text">
+            Soru yükleniyor...
+        </div>
+
+        <div class="options-container" id="options-box">
+            <!-- Seçenekler buraya dinamik gelecek -->
+        </div>
+
+        <div class="footer">
+            <button class="btn-next" id="btn-next" onclick="nextQuestion()">Sonraki Soru ➡️</button>
+        </div>
+    </div>
+
+    <!-- Test Bitiş Ekranı -->
+    <div class="result-screen" id="result-box">
+        <h2>🎉 TEBRİKLER! TESTİ TAMAMLADIN! 🎉</h2>
+        <p>Harika bir iş çıkardın!</p>
+        <div class="score-badge" id="final-score">100 / 100</div>
+        <p id="result-message" style="font-size: 18px; margin-bottom: 20px;"></p>
+        <button class="btn-restart" onclick="restartQuiz()">🔄 Yeniden Başla</button>
+    </div>
+</div>
+
+<script>
+    // Ses Efektleri (Web Audio API)
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    
+    function playSound(type) {
+        if (audioCtx.state === 'suspended') {
+            audioCtx.resume();
+        }
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+
+        if (type === 'correct') {
+            osc.frequency.setValueAtTime(523.25, audioCtx.currentTime); // C5
+            osc.frequency.setValueAtTime(659.25, audioCtx.currentTime + 0.1); // E5
+            osc.frequency.setValueAtTime(783.99, audioCtx.currentTime + 0.2); // G5
+            gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.4);
+        } else if (type === 'wrong') {
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(200, audioCtx.currentTime);
+            osc.frequency.setValueAtTime(150, audioCtx.currentTime + 0.15);
+            gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.3);
+        }
+    }
+
+    // Sorular Veri Seti (20 Soru - Her Biri 5 Puan)
+    const questions = [
+        {
+            q: "1) Aşağıdakilerden hangisi İmanın Şartlarından biri DEĞİLDİR?",
+            options: ["Allah'a inanmak", "Meleklere inanmak", "Namaz kılmak", "Kitaplara inanmak"],
+            answer: 2
+        },
+        {
+            q: "2) İmanın şartları toplam kaç tanedir?",
+            options: ["5", "6", "4", "3"],
+            answer: 1
+        },
+        {
+            q: "3) İmanın şartlarında yer alan 'Kadere, hayır ve şerrin Allah'tan geldiğine inanmak' ilkesinde geçen 'Hayır ve Şer' kelimelerinin anlamı nedir?",
+            options: ["Gece ve Gündüz", "Zenginlik ve Fakirlik", "İyilik ve Kötülük", "Doğru ve Yanlış"],
+            answer: 2
+        },
+        {
+            q: "4) İslam'ın şartları toplam kaç tanedir?",
+            options: ["5", "6", "10", "4"],
+            answer: 0
+        },
+        {
+            q: "5) Aşağıdakilerden hangisi İslam'ın şartlarından biridir?",
+            options: ["Peygamberlere inanmak", "Oruç tutmak", "Ahirete inanmak", "Kader ve kazaya inanmak"],
+            answer: 1
+        },
+        {
+            q: "6) Müslüman olmayan bir insanın Müslüman olması için ne yapması gerekir?",
+            options: ["Kelime-i Şehadet getirmek", "Kurban kesmek", "Hacca gitmek", "Abdest almak"],
+            answer: 0
+        },
+        {
+            q: "7) 'Eşhedü en la ilahe illallah ve eşhedü enne Muhammeden resulullah' cümlesine ne ad verilir?",
+            options: ["Besmele", "Kelime-i Şehadet", "Kelime-i Tevhid", "Sübhaneke"],
+            answer: 1
+        },
+        {
+            q: "8) Kelime-i Şehadet'in Türkçe anlamı aşağıdakilerden hangisidir?",
+            options: [
+                "Şahitlik ederim ki Allah'tan başka ilah yoktur ve şahitlik ederim ki Hazreti Muhammed Allah'ın elçisidir.",
+                "Allah her şeyi gören ve bilendir.",
+                "Rahman ve Rahim olan Allah'ın adıyla başlarım.",
+                "Allah'tan başka ilah yoktur, Hz. Muhammed O'nun elçisidir."
+            ],
+            answer: 0
+        },
+        {
+            q: "9) Boşluğu doldurunuz: 'Eşhedü en la ilahe illallah ve eşhedü enne Muhammeden .........'",
+            options: ["resulullah", "ilah", "nebiyullah", "kerim"],
+            answer: 0
+        },
+        {
+            q: "10) 'La ilahe illallah Muhammedün Resulullah' ifadesinin adı nedir?",
+            options: [
+                "Kelime-i Tevhid",
+                "Kelime-i Şehadet",
+                "Besmele",
+                "Tekbir"
+            ],
+            answer: 0
+        },
+        {
+            q: "11) Öğrendiğimiz 'Bismillah' kelimesinin Türkçe anlamı nedir?",
+            options: ["Allah'ın adıyla", "Allah en büyüktür", "Allah'a şükürler olsun", "Allah kabul etsin"],
+            answer: 0
+        },
+        {
+            q: "12) 'Bismillahirrahmanirrahim' cümlesinin Türkçe anlamı aşağıdakilerden hangisidir?",
+            options: [
+                "Kovulmuş şeytandan Allah'a sığınırım.",
+                "Rahman ve Rahim olan Allah'ın adıyla.",
+                "Şahitlik ederim ki Allah tektir.",
+                "Peygamberimiz Hz. Muhammed Allah'ın elçisidir."
+            ],
+            answer: 1
+        },
+        {
+            q: "13) 'Euzu billahi mineşşeytanirracim, Bismillahirrahmanirrahim' ifadesinin Türkçe anlamı nedir?",
+            options: [
+                "Kovulmuş şeytandan Allah'a sığınırım. Rahman ve Rahim olan Allah'ın adıyla.",
+                "Allah'ım seni noksan sıfatlardan tenzih ederim.",
+                "Hamd alemlerin Rabbi olan Allah'a mahsustur.",
+                "Allah'tan başka ilah yoktur."
+            ],
+            answer: 0
+        },
+        {
+            q: "14) Bir işe başlarken 'Euzu billahi mineşşeytanirracim, Bismillahirrahmanirrahim' diyerek ne yapmış oluruz?",
+            options: [
+                "Kovulmuş şeytandan Allah'a sığınmış ve Rahman ve Rahim olan Allah'ın adıyla başlamış oluruz.",
+                "Sadece namazı bitirmiş oluruz.",
+                "Oruç açmış oluruz.",
+                "Hac görevimizi yapmış oluruz."
+            ],
+            answer: 0
+        },
+        {
+            q: "15) Aşağıdaki Kutsal Kitap ve gönderildiği Peygamber eşleştirmelerinden hangisi YANLIŞTIR?",
+            options: [
+                "Tevrat ➡️ Hz. Musa",
+                "Zebur ➡️ Hz. Davud",
+                "İncil ➡️ Hz. İsa",
+                "Kur'an-ı Kerim ➡️ Hz. İbrahim"
+            ],
+            answer: 3
+        },
+        {
+            q: "16) Hz. Musa'ya gönderilen ilahi kutsal kitabın adı nedir?",
+            options: ["Zebur", "Tevrat", "İncil", "Kur'an-ı Kerim"],
+            answer: 1
+        },
+        {
+            q: "17) Zebur hangi peygambere verilmiştir?",
+            options: ["Hz. Davud", "Hz. Musa", "Hz. İsa", "Hz. Muhammed"],
+            answer: 0
+        },
+        {
+            q: "18) Dört büyük meleklerden biri olan Cebrail'in görevi nedir?",
+            options: ["Vahiy meleğidir.", "Sura üfleyen melektir.", "Doğa olaylarını düzenler.", "Can alır."],
+            answer: 0
+        },
+        {
+            q: "19) Dört büyük meleklerden İsrafil'in görevi nedir?",
+            options: ["Sura üfleyen melek", "Vahiy meleği", "Doğa olayları ve rızık meleği", "Ölüm meleği"],
+            answer: 0
+        },
+        {
+            q: "20) Mikail'in görevi aşağıdakilerden hangisidir?",
+            options: ["Doğa olayları ve canlıların rızıklandırılması", "Vahiy getirmek", "Sura üflemek", "Kıyameti koparmak"],
+            answer: 0
+        }
+    ];
+
+    let currentQuestionIndex = 0;
+    let score = 0;
+    let answered = false;
+
+    function loadQuestion() {
+        answered = false;
+        document.getElementById('btn-next').style.display = 'none';
+        
+        const qData = questions[currentQuestionIndex];
+        
+        // İlerleme çubuğunu güncelle
+        const progressPercent = ((currentQuestionIndex + 1) / questions.length) * 100;
+        document.getElementById('progress').style.width = `${progressPercent}%`;
+        document.getElementById('question-number').innerText = `Soru ${currentQuestionIndex + 1}/${questions.length}`;
+        
+        // Soru metnini yaz
+        document.getElementById('question-text').innerText = qData.q;
+        
+        // Seçenekleri oluştur
+        const optionsBox = document.getElementById('options-box');
+        optionsBox.innerHTML = '';
+        
+        qData.options.forEach((option, index) => {
+            const btn = document.createElement('button');
+            btn.className = 'btn-option';
+            btn.innerText = option;
+            btn.onclick = () => selectOption(index, btn);
+            optionsBox.appendChild(btn);
+        });
+    }
+
+    function selectOption(selectedIndex, btnElement) {
+        if (answered) return;
+        answered = true;
+
+        const qData = questions[currentQuestionIndex];
+        const allButtons = document.querySelectorAll('.btn-option');
+
+        if (selectedIndex === qData.answer) {
+            btnElement.classList.add('correct');
+            score += 5;
+            document.getElementById('score-info').innerText = `Puan: ${score}`;
+            playSound('correct');
+            
+            // Konfeti efekti
+            confetti({
+                particleCount: 50,
+                spread: 60,
+                origin: { y: 0.7 }
+            });
+        } else {
+            btnElement.classList.add('wrong');
+            allButtons[qData.answer].classList.add('correct');
+            playSound('wrong');
+        }
+
+        document.getElementById('btn-next').style.display = 'block';
+    }
+
+    function nextQuestion() {
+        currentQuestionIndex++;
+        if (currentQuestionIndex < questions.length) {
+            loadQuestion();
+        } else {
+            showResults();
+        }
+    }
+
+    function showResults() {
+        document.getElementById('quiz-box').style.display = 'none';
+        document.getElementById('result-box').style.display = 'block';
+        document.getElementById('final-score').innerText = `${score} / 100`;
+
+        let message = "";
+        if (score === 100) {
+            message = "🏆 Muhteşemsin! Bütün soruları doğru cevapladın ve 100 Tam Puan aldın! Harika bir Din Kültürü şampiyonusun! 🎉👏";
+            // Bitiş Büyük Konfeti Yağmuru
+            var duration = 3 * 1000;
+            var end = Date.now() + duration;
+
+            (function frame() {
+                confetti({
+                    particleCount: 7,
+                    angle: 60,
+                    spread: 55,
+                    origin: { x: 0 }
+                });
+                confetti({
+                    particleCount: 7,
+                    angle: 120,
+                    spread: 55,
+                    origin: { x: 1 }
+                });
+
+                if (Date.now() < end) {
+                    requestAnimationFrame(frame);
+                }
+            })();
+        } else if (score >= 80) {
+            message = "🌟 Çok Başarılısın! Harika bir puan aldın. Tebrik ederim!";
+        } else if (score >= 50) {
+            message = "👍 Güzel çaba! Bir kez daha tekrar ederek 100 puan alabilirsin.";
+        } else {
+            message = "💪 Biraz daha tekrar yapmaya ne dersin? Yeniden dene ve puanını yükselt!";
+        }
+
+        document.getElementById('result-message').innerText = message;
+    }
+
+    function restartQuiz() {
+        currentQuestionIndex = 0;
+        score = 0;
+        document.getElementById('score-info').innerText = `Puan: 0`;
+        document.getElementById('result-box').style.display = 'none';
+        document.getElementById('quiz-box').style.display = 'block';
+        loadQuestion();
+    }
+
+    // Uygulama Başlatma
+    loadQuestion();
+</script>
+
+</body>
+</html>
